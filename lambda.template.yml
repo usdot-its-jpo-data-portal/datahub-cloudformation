@@ -1,0 +1,429 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda functions.
+
+Resources:
+  ### canary-lambda resources
+  CanaryCodeBuildGeneric:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: canary-lambda-generic
+        EnvName: generic
+        CodeBuildDescription: CodeBuild project for testing buildability of all commits.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/canary-lambda.git
+        WebhookPattern: "^refs/heads/(master|development)$"
+        WebhookExcludePattern: True
+
+  CanaryCodeBuildDev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: canary-lambda-dev
+        EnvName: dev
+        CodeBuildDescription: CodeBuild project for deploying the Canary Lambda to dev.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/canary-lambda.git
+        WebhookPattern: "^refs/heads/development$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=dev"
+  CanaryECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: canary-lambda-dev
+
+  CanaryCodeBuildStage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: canary-lambda-stage
+        EnvName: stage
+        CodeBuildDescription: CodeBuild project for deploying the Canary Lambda to stage.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/canary-lambda.git
+        WebhookPattern: "^refs/heads/master$"
+        WebhookExcludePattern: False
+  CanaryECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: canary-lambda-stage
+
+  CanaryCodeBuildProd:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-promotion-template:1}}"
+      Parameters:
+        FunctionName: canary-lambda-prod
+        EnvName: prod
+        CodeBuildDescription: CodeBuild project for deploying the Canary Lambda to prod.
+        OriginRepo: canary-lambda-stage
+  CanaryECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: canary-lambda-prod
+
+  ### metrics-sandbox-lambda resources
+  MetricsSandboxGeneric:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-sandbox-lambda-generic
+        EnvName: generic
+        CodeBuildDescription: CodeBuild project for testing buildability of all commits.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_sandbox_lambda.git
+        WebhookPattern: "^refs/heads/(master|development)$"
+        WebhookExcludePattern: True
+
+  MetricsSandboxDev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-sandbox-lambda-dev
+        EnvName: dev
+        CodeBuildDescription: CodeBuild project for deploying the Metrics Sandbox Lambda to dev.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_sandbox_lambda.git
+        WebhookPattern: "^refs/heads/development$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=dev"
+  MetricsSandboxECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-sandbox-lambda-dev
+
+  MetricsSandboxStage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-sandbox-lambda-stage
+        EnvName: stage
+        CodeBuildDescription: CodeBuild project for deploying the Metrics Sandbox Lambda to stage.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_sandbox_lambda.git
+        WebhookPattern: "^refs/heads/master$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=stage"
+  MetricsSandboxECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-sandbox-lambda-stage
+
+  MetricsSandboxCodeBuildProd:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-promotion-template:1}}"
+      Parameters:
+        FunctionName: metrics-sandbox-lambda-prod
+        EnvName: prod
+        CodeBuildDescription: CodeBuild project for deploying the Metrics Sandbox Lambda to prod.
+        OriginRepo: metrics-sandbox-lambda-stage
+  MetricsSandboxECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-sandbox-prod
+
+  ### metrics-dtg-lambda resources
+  MetricsDTGGeneric:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-dtg-lambda-generic
+        EnvName: generic
+        CodeBuildDescription: CodeBuild project for testing buildability of all commits.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_dtg_lambda.git
+        WebhookPattern: "^refs/heads/(master|development)$"
+        WebhookExcludePattern: True
+
+  MetricsDTGDev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-dtg-lambda-dev
+        EnvName: dev
+        CodeBuildDescription: CodeBuild project for deploying the Metrics DTG Lambda to dev.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_dtg_lambda.git
+        WebhookPattern: "^refs/heads/development$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=dev"
+  MetricsDTGECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-dtg-lambda-dev
+
+  MetricsDTGStage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-dtg-lambda-stage
+        EnvName: stage
+        CodeBuildDescription: CodeBuild project for deploying the Metrics DTG Lambda to stage.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_dtg_lambda.git
+        WebhookPattern: "^refs/heads/master$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=stage"
+  MetricsDTGECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-dtg-lambda-stage
+
+  MetricsDTGCodeBuildProd:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-promotion-template:1}}"
+      Parameters:
+        FunctionName: metrics-dtg-lambda-prod
+        EnvName: prod
+        CodeBuildDescription: CodeBuild project for deploying the Metrics DTG Lambda to prod.
+        OriginRepo: metrics-dtg-lambda-stage
+  MetricsDTGECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-dtg-prod
+
+  ### metrics-github-lambda resources
+  MetricsGithubGeneric:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-github-lambda-generic
+        EnvName: generic
+        CodeBuildDescription: CodeBuild project for testing buildability of all commits.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_github_lambda.git
+        WebhookPattern: "^refs/heads/(master|development)$"
+        WebhookExcludePattern: True
+
+  MetricsGithubDev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-github-lambda-dev
+        EnvName: dev
+        CodeBuildDescription: CodeBuild project for deploying the Metrics Github Lambda to dev.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_github_lambda.git
+        WebhookPattern: "^refs/heads/development$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=dev"
+  MetricsGithubECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-github-lambda-dev
+
+  MetricsGithubStage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: metrics-github-lambda-stage
+        EnvName: stage
+        CodeBuildDescription: CodeBuild project for deploying the Metrics Github Lambda to stage.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/metrics_github_lambda.git
+        WebhookPattern: "^refs/heads/master$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=stage"
+  MetricsGithubECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-github-lambda-stage
+
+  MetricsGithubCodeBuildProd:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-promotion-template:1}}"
+      Parameters:
+        FunctionName: metrics-github-lambda-prod
+        EnvName: prod
+        CodeBuildDescription: CodeBuild project for deploying the Metrics Github Lambda to prod.
+        OriginRepo: metrics-github-lambda-stage
+  MetricsGithubECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: metrics-github-prod
+
+  ### datahub-ingest resources
+  DatahubIngestGeneric:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: datahub-ingest-lambda-generic
+        EnvName: generic
+        CodeBuildDescription: CodeBuild project for testing buildability of all commits.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/datahub-ingest.git
+        WebhookPattern: "^refs/heads/(master|development)$"
+        WebhookExcludePattern: True
+
+  DatahubIngestDev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: datahub-ingest-lambda-dev
+        EnvName: dev
+        CodeBuildDescription: CodeBuild project for deploying the Datahub Ingest Lambda to dev.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/datahub-ingest.git
+        WebhookPattern: "^refs/heads/development$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=dev"
+  DatahubIngestECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: datahub-ingest-lambda-dev
+
+  DatahubIngestStage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: datahub-ingest-lambda-stage
+        EnvName: stage
+        CodeBuildDescription: CodeBuild project for deploying the Datahub Ingest Lambda to stage.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/datahub-ingest.git
+        WebhookPattern: "^refs/heads/master$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=stage"
+  DatahubIngestECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: datahub-ingest-lambda-stage
+
+  DatahubIngestCodeBuildProd:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-promotion-template:1}}"
+      Parameters:
+        FunctionName: datahub-ingest-lambda-prod
+        EnvName: prod
+        CodeBuildDescription: CodeBuild project for deploying the Datahub Ingest Lambda to prod.
+        OriginRepo: datahub-ingest-lambda-stage
+  DatahubIngestECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: datahub-ingest-prod
+
+  ### validation-results-slack-lambda resources
+  ValidationResultsSlackCodeBuildGeneric:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: validation-results-slack-lambda-generic
+        EnvName: generic
+        CodeBuildDescription: CodeBuild project for testing buildability of all commits.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/validation-results-slack-lambda.git
+        WebhookPattern: "^refs/heads/(master|development)$"
+        WebhookExcludePattern: True
+
+  ValidationResultsSlackCodeBuildDev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: validation-results-slack-lambda-dev
+        EnvName: dev
+        CodeBuildDescription: CodeBuild project for deploying the Validation Results Lambda to dev.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/validation-results-slack-lambda.git
+        WebhookPattern: "^refs/heads/development$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=dev"
+  ValidationResultsSlackECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: validation-results-slack-lambda-dev
+
+  ValidationResultsSlackCodeBuildStage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: validation-results-slack-lambda-stage
+        EnvName: stage
+        CodeBuildDescription: CodeBuild project for deploying the Validation Results Lambda to stage.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/validation-results-slack-lambda.git
+        WebhookPattern: "^refs/heads/master$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=stage"
+  ValidationResultsSlackECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: validation-results-slack-lambda-stage
+
+  ValidationResultsSlackCodeBuildProd:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-promotion-template:1}}"
+      Parameters:
+        FunctionName: validation-results-slack-lambda-prod
+        EnvName: prod
+        CodeBuildDescription: CodeBuild project for deploying the Validation Results Lambda to prod.
+        OriginRepo: validation-results-slack-lambda-stage
+  ValidationResultsSlackECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: validation-results-slack-prod
+
+  ### cv_pilot_ingest resources
+  CVPilotIngestCodeBuildGeneric:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: cv-pilot-ingest-lambda-generic
+        EnvName: generic
+        CodeBuildDescription: CodeBuild project for testing buildability of all commits.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/cv_pilot_ingest.git
+        WebhookPattern: "^refs/heads/(master|development)$"
+        WebhookExcludePattern: True
+
+  CVPilotIngestCodeBuildDev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: cv-pilot-ingest-lambda-dev
+        EnvName: dev
+        CodeBuildDescription: CodeBuild project for deploying the CV Pilot Ingest Lambda to dev.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/cv_pilot_ingest.git
+        WebhookPattern: "^refs/heads/development$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=dev"
+  CVPilotIngestECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: cv-pilot-ingest-lambda-dev
+
+  CVPilotIngestCodeBuildStage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-github-template:1}}"
+      Parameters:
+        FunctionName: cv-pilot-ingest-lambda-stage
+        EnvName: stage
+        CodeBuildDescription: CodeBuild project for deploying the CV Pilot Ingest Lambda to stage.
+        GithubUrl: https://github.com/usdot-its-jpo-data-portal/cv_pilot_ingest.git
+        WebhookPattern: "^refs/heads/master$"
+        WebhookExcludePattern: False
+        ParameterOverrides: "--parameter-overrides ENV=stage"
+  CVPilotIngestECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: cv-pilot-ingest-lambda-stage
+
+  CVPilotIngestCodeBuildProd:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "{{resolve:ssm:codebuild-promotion-template:1}}"
+      Parameters:
+        FunctionName: cv-pilot-ingest-lambda-prod
+        EnvName: prod
+        CodeBuildDescription: CodeBuild project for deploying the CV Pilot Ingest Lambda to prod.
+        OriginRepo: cv-pilot-ingest-lambda-stage
+  CVPilotIngestECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: cv-pilot-ingest-lambda-prod
