@@ -1,0 +1,307 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda functions.
+
+### Required SSM Variables:
+# "{{resolve:ssm:base-image:1}}"
+# "{{resolve:ssm:lambda-bucket:1}}"
+# "{{resolve:ssm:codebuild-role-arn:1}}"
+# "{{resolve:ssm:sqs-storage-bucket:1}}"
+# "{{resolve:ssm:canary-results-sqs-dev:1}}"
+# "{{resolve:ssm:canary-results-sqs-stage:1}}"
+# "{{resolve:ssm:canary-results-sqs-prod:1}}"
+# "{{resolve:ssm:canary-source-sqs-arn-dev:1}}"
+# "{{resolve:ssm:canary-source-sqs-arn-stage:1}}"
+# "{{resolve:ssm:canary-source-sqs-arn-prod:1}}"
+
+Resources:
+  # ECR Repositories
+  CanaryECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: canary-lambda-dev
+  CanaryECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: canary-lambda-stage
+  CanaryECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: canary-lambda-prod
+
+  # CodeBuild projects
+  CanaryCodeBuildGeneric:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for testing buildability of all commits.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: ""
+          - Name: SQS_VALIDATION_QUEUE_ARN
+            Type: PLAINTEXT
+            Value: ""
+          - Name: SQS_RESULT_QUEUE
+            Type: PLAINTEXT
+            Value: ""
+          - Name: SQS_PUBLISHER_MODE
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: VERBOSE_OUTPUT
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: generic
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=$ENV VERBOSEOUTPUT=$VERBOSE_OUTPUT SQSPUBLISHERMODE=$SQS_PUBLISHER_MODE SQSVALIDATIONQUEUEARN=$SQS_VALIDATION_QUEUE_ARN"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: canary-lambda-generic
+          - Name: IMAGE_REPO_NAME
+            Type: PLAINTEXT
+            Value: canary-lambda-generic
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: canary-lambda-generic
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/canary-lambda.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/(master|development)$"
+              ExcludeMatchedPattern: True
+        Webhook: True
+
+  ####################
+  CanaryCodeBuildDev:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying the Canary Lambda to dev.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
+          - Name: SQS_VALIDATION_QUEUE_ARN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:canary-source-sqs-arn-dev:1}}"
+          - Name: SQS_RESULT_QUEUE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:canary-results-sqs-dev:1}}"
+          - Name: SQS_PUBLISHER_MODE
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: VERBOSE_OUTPUT
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: dev
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=$ENV VERBOSEOUTPUT=$VERBOSE_OUTPUT SQSPUBLISHERMODE=$SQS_PUBLISHER_MODE SQSRESULTQUEUE=$SQS_RESULT_QUEUE"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: canary-lambda-dev
+          - Name: IMAGE_REPO_NAME
+            Type: PLAINTEXT
+            Value: canary-lambda-dev
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: canary-lambda-dev
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/canary-lambda.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/development$"
+              ExcludeMatchedPattern: False
+        Webhook: True
+
+  CanaryCodeBuildStage:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying the Canary Lambda to stage.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
+          - Name: SQS_VALIDATION_QUEUE_ARN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:canary-source-sqs-arn-stage:1}}"
+          - Name: SQS_RESULT_QUEUE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:canary-results-sqs-stage:1}}"
+          - Name: SQS_PUBLISHER_MODE
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: VERBOSE_OUTPUT
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: stage
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=$ENV VERBOSEOUTPUT=$VERBOSE_OUTPUT SQSPUBLISHERMODE=$SQS_PUBLISHER_MODE SQSRESULTQUEUE=$SQS_RESULT_QUEUE"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: canary-lambda-stage
+          - Name: IMAGE_REPO_NAME
+            Type: PLAINTEXT
+            Value: canary-lambda-stage
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: canary-lambda-stage
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/canary-lambda.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/master$"
+              ExcludeMatchedPattern: False
+        Webhook: True
+
+  CanaryCodeBuildProd:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying the Canary Lambda to prod.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
+          - Name: SQS_VALIDATION_QUEUE_ARN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:canary-source-sqs-arn-prod:1}}"
+          - Name: SQS_RESULT_QUEUE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:canary-results-sqs-prod:1}}"
+          - Name: SQS_PUBLISHER_MODE
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: VERBOSE_OUTPUT
+            Type: PLAINTEXT
+            Value: "TRUE"
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: prod
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=$ENV VERBOSEOUTPUT=$VERBOSE_OUTPUT SQSPUBLISHERMODE=$SQS_PUBLISHER_MODE SQSRESULTQUEUE=$SQS_RESULT_QUEUE"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: canary-lambda-prod
+          - Name: ORIGIN_REPO
+            Type: PLAINTEXT
+            Value: !Ref CanaryECRStage
+          - Name: DESTINATION_REPO
+            Type: PLAINTEXT
+            Value: !Ref CanaryECRProd
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: canary-lambda-prod-promotion
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Type: NO_SOURCE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                docker: 18
+            build:
+              commands:
+                - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+                - docker pull $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ORIGIN_REPO:latest
+                - docker tag $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ORIGIN_REPO:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
+                - |
+                  docker run --rm \
+                    -e "BUCKET=$BUCKET" \
+                    -e "FUNCTION_NAME=$FUNCTION_NAME" \
+                    -e "REGION=$AWS_DEFAULT_REGION" \
+                    -e "ENV=$ENV" \
+                    -e "PARAMETER_OVERRIDES=$PARAMETER_OVERRIDES" \
+                    -i $IMAGE_URI:$IMAGE_TAG
+                - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
