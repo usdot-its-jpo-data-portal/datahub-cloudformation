@@ -249,7 +249,7 @@ Resources:
             Value: TRUE
           - Name: ENV
             Type: PLAINTEXT
-            Value: dev
+            Value: prod
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=$ENV VERBOSEOUTPUT=$VERBOSE_OUTPUT SQSPUBLISHERMODE=$SQS_PUBLISHER_MODE SQSRESULTQUEUE=$SQS_RESULT_QUEUE"
