@@ -121,9 +121,6 @@ Resources:
           - Name: SQS_PUBLISHER_MODE
             Type: PLAINTEXT
             Value: "TRUE"
-          - Name: SQS_STORAGE_S3_BUCKET
-            Type: PLAINTEXT
-            Value: "TRUE"
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
