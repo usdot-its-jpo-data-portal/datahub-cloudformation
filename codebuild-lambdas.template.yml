@@ -53,10 +53,10 @@ Resources:
             Value: ""
           - Name: SQS_PUBLISHER_MODE
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: ENV
             Type: PLAINTEXT
             Value: generic
@@ -120,13 +120,13 @@ Resources:
             Value: "{{resolve:ssm:canary-results-sqs-dev:1}}"
           - Name: SQS_PUBLISHER_MODE
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: SQS_STORAGE_S3_BUCKET
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: ENV
             Type: PLAINTEXT
             Value: dev
@@ -189,10 +189,10 @@ Resources:
             Value: "{{resolve:ssm:canary-results-sqs-stage:1}}"
           - Name: SQS_PUBLISHER_MODE
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: ENV
             Type: PLAINTEXT
             Value: stage
@@ -255,10 +255,10 @@ Resources:
             Value: "{{resolve:ssm:canary-results-sqs-prod:1}}"
           - Name: SQS_PUBLISHER_MODE
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
-            Value: TRUE
+            Value: "TRUE"
           - Name: ENV
             Type: PLAINTEXT
             Value: prod
