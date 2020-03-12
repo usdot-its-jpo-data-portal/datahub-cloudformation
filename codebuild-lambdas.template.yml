@@ -42,6 +42,9 @@ Resources:
         PrivilegedMode: True
         EnvironmentVariables:
           # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: ""
           - Name: SQS_VALIDATION_QUEUE_ARN
             Type: PLAINTEXT
             Value: ""
@@ -106,6 +109,9 @@ Resources:
         PrivilegedMode: True
         EnvironmentVariables:
           # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
           - Name: SQS_VALIDATION_QUEUE_ARN
             Type: PLAINTEXT
             Value: "{{resolve:ssm:canary-source-sqs-arn-dev:1}}"
@@ -172,6 +178,9 @@ Resources:
         PrivilegedMode: True
         EnvironmentVariables:
           # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
           - Name: SQS_VALIDATION_QUEUE_ARN
             Type: PLAINTEXT
             Value: "{{resolve:ssm:canary-source-sqs-arn-stage:1}}"
@@ -235,6 +244,9 @@ Resources:
         PrivilegedMode: True
         EnvironmentVariables:
           # Runtime variables
+          - Name: SQS_STORAGE_S3_BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
           - Name: SQS_VALIDATION_QUEUE_ARN
             Type: PLAINTEXT
             Value: "{{resolve:ssm:canary-source-sqs-arn-prod:1}}"
