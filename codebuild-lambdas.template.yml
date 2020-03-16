@@ -672,7 +672,7 @@ Resources:
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: CodeBuild project for deploying the Validation Results Lambda to dev.
+      Description: CodeBuild project for deploying the Datahub Ingest Lambda to dev.
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
@@ -732,7 +732,7 @@ Resources:
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: CodeBuild project for deploying the Validation Results Lambda to stage.
+      Description: CodeBuild project for deploying the Datahub Ingest Lambda to stage.
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
@@ -792,7 +792,7 @@ Resources:
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: CodeBuild project for deploying the Validation Results Lambda to prod.
+      Description: CodeBuild project for deploying the Datahub Ingest Lambda to prod.
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
