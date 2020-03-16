@@ -680,10 +680,10 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK_URL
             Type: PLAINTEXT
-            Value: ""
+            Value: "{{resolve:ssm:slack-ingest-dev:1}}"
           - Name: ELASTICSEARCH_API_BASE_URL
             Type: PLAINTEXT
-            Value: ""
+            Value: "{{resolve:ssm:elasticsearch-url-dev:1}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: generic
@@ -737,10 +737,10 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK_URL
             Type: PLAINTEXT
-            Value: ""
+            Value: "{{resolve:ssm:slack-ingest-stage:1}}"
           - Name: ELASTICSEARCH_API_BASE_URL
             Type: PLAINTEXT
-            Value: ""
+            Value: "{{resolve:ssm:elasticsearch-url-stage:1}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: generic
@@ -794,10 +794,10 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK_URL
             Type: PLAINTEXT
-            Value: ""
+            Value: "{{resolve:ssm:slack-ingest-prod:1}}"
           - Name: ELASTICSEARCH_API_BASE_URL
             Type: PLAINTEXT
-            Value: ""
+            Value: "{{resolve:ssm:elasticsearch-url-prod:1}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: generic
