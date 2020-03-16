@@ -15,6 +15,13 @@ Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda func
 # "{{resolve:ssm:slack-webhook-dev:version}}"
 # "{{resolve:ssm:slack-webhook-stage:version}}"
 # "{{resolve:ssm:slack-webhook-prod:version}}"
+# "{{resolve:ssm:slack-ingest-dev:version}}"
+# "{{resolve:ssm:slack-ingest-stage:version}}"
+# "{{resolve:ssm:slack-ingest-prod:version}}"
+# "{{resolve:ssm:slack-ingest-prod:version}}"
+# "{{resolve:ssm:elasticsearch-url-dev:version}}"
+# "{{resolve:ssm:elasticsearch-url-stage:version}}"
+# "{{resolve:ssm:elasticsearch-url-prod:version}}"
 
 Resources:
   ######################
@@ -558,6 +565,265 @@ Resources:
             Type: PLAINTEXT
             Value: "{{resolve:ssm:lambda-bucket:1}}"
       Name: validation-results-lambda-prod-promotion
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Type: NO_SOURCE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                docker: 18
+            build:
+              commands:
+                - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+                - docker pull $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ORIGIN_REPO:latest
+                - docker tag $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ORIGIN_REPO:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
+                - |
+                  PARAMETER_OVERRIDES=$(eval echo $PARAMETER_OVERRIDES)
+                  docker run --rm \
+                    -e "BUCKET=$BUCKET" \
+                    -e "FUNCTION_NAME=$FUNCTION_NAME" \
+                    -e "REGION=$AWS_DEFAULT_REGION" \
+                    -e "ENV=$ENV" \
+                    -e "PARAMETER_OVERRIDES=${PARAMETER_OVERRIDES}" \
+                    -i $IMAGE_URI:$IMAGE_TAG
+                - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
+
+  ############################
+  ### Datahub Ingest Resources
+
+  # ECR Repositories
+  DatahubIngestECRDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: datahub-ingest-lambda-dev
+  DatahubIngestECRStage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: datahub-ingest-lambda-stage
+  DatahubIngestECRProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: datahub-ingest-lambda-prod
+
+  # CodeBuild Projects
+  DatahubIngestBuildGeneric:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for testing buildability of all commits.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SLACK_WEBHOOK_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ELASTICSEARCH_API_BASE_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: generic
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: datahub-ingest-lambda-generic
+          - Name: IMAGE_REPO_NAME
+            Type: PLAINTEXT
+            Value: datahub-ingest-lambda-generic
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: datahub-ingest-lambda-generic
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/datahub-ingest.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/(master|development)$"
+              ExcludeMatchedPattern: True
+        Webhook: True
+
+  DatahubIngestCodeBuildDev:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying the Validation Results Lambda to dev.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SLACK_WEBHOOK_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ELASTICSEARCH_API_BASE_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: generic
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: datahub-ingest-lambda-dev
+          - Name: IMAGE_REPO_NAME
+            Type: PLAINTEXT
+            Value: datahub-ingest-lambda-dev
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: datahub-ingest-lambda-dev
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/datahub-ingest.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/development$"
+              ExcludeMatchedPattern: False
+        Webhook: True
+
+  DatahubIngestCodeBuildStage:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying the Validation Results Lambda to stage.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SLACK_WEBHOOK_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ELASTICSEARCH_API_BASE_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: generic
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: datahub-ingest-lambda-stage
+          - Name: IMAGE_REPO_NAME
+            Type: PLAINTEXT
+            Value: datahub-ingest-lambda-stage
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: datahub-ingest-lambda-stage
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/datahub-ingest.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/master$"
+              ExcludeMatchedPattern: False
+        Webhook: True
+
+  DatahubIngestCodeBuildProd:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying the Validation Results Lambda to prod.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          # Runtime variables
+          - Name: SLACK_WEBHOOK_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ELASTICSEARCH_API_BASE_URL
+            Type: PLAINTEXT
+            Value: ""
+          - Name: ENV
+            Type: PLAINTEXT
+            Value: generic
+          - Name: PARAMETER_OVERRIDES
+            Type: PLAINTEXT
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+          # Buildtime variables
+          - Name: FUNCTION_NAME
+            Type: PLAINTEXT
+            Value: datahub-ingest-lambda-prod
+          - Name: ORIGIN_REPO
+            Type: PLAINTEXT
+            Value: !Ref DatahubIngestECRStage
+          - Name: DESTINATION_REPO
+            Type: PLAINTEXT
+            Value: !Ref DatahubIngestECRProd
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountId
+          - Name: BASE_IMAGE
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:base-image:1}}"
+          - Name: BUCKET
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:lambda-bucket:1}}"
+      Name: datahub-ingest-lambda-prod-promotion
       ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
       Source:
         Type: NO_SOURCE
