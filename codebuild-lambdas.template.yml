@@ -756,9 +756,6 @@ Resources:
           - Name: SONAR_TOKEN
             Type: PLAINTEXT
             Value: "{{resolve:ssm:sonar-token:1}}"
-          - Name: SONAR_TOKEN
-            Type: PLAINTEXT
-            Value: "{{resolve:ssm:sonar-token:1}}"
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
             Value: datahub-ingest-lambda-stage
