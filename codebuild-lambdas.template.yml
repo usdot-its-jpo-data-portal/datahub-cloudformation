@@ -633,6 +633,9 @@ Resources:
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
           # Buildtime variables
+          - Name: SONAR_TOKEN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sonar-token:1}}"
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
             Value: datahub-ingest-lambda-generic
@@ -690,6 +693,9 @@ Resources:
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
           # Buildtime variables
+          - Name: SONAR_TOKEN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sonar-token:1}}"
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
             Value: datahub-ingest-lambda-dev
@@ -747,6 +753,12 @@ Resources:
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
           # Buildtime variables
+          - Name: SONAR_TOKEN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sonar-token:1}}"
+          - Name: SONAR_TOKEN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sonar-token:1}}"
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
             Value: datahub-ingest-lambda-stage
@@ -804,6 +816,9 @@ Resources:
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
           # Buildtime variables
+          - Name: SONAR_TOKEN
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:sonar-token:1}}"
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
             Value: datahub-ingest-lambda-prod
