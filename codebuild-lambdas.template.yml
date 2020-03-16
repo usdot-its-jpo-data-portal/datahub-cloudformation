@@ -18,7 +18,6 @@ Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda func
 # "{{resolve:ssm:slack-ingest-dev:version}}"
 # "{{resolve:ssm:slack-ingest-stage:version}}"
 # "{{resolve:ssm:slack-ingest-prod:version}}"
-# "{{resolve:ssm:slack-ingest-prod:version}}"
 # "{{resolve:ssm:elasticsearch-url-dev:version}}"
 # "{{resolve:ssm:elasticsearch-url-stage:version}}"
 # "{{resolve:ssm:elasticsearch-url-prod:version}}"
