@@ -21,6 +21,11 @@ Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda func
 # "{{resolve:ssm:elasticsearch-url-dev:version}}"
 # "{{resolve:ssm:elasticsearch-url-stage:version}}"
 # "{{resolve:ssm:elasticsearch-url-prod:version}}"
+# "{{resolve:ssm:validation-results-recipients-dict-dev:version}}"
+# "{{resolve:ssm:validation-results-recipients-dict-stage:version}}"
+# "{{resolve:ssm:validation-results-recipients-dict-prod:version}}"
+# "{{resolve:ssm:validation-results-sender:version}}"
+# "{{resolve:ssm:validation-results-cc:version}}"
 
 Resources:
   ######################
