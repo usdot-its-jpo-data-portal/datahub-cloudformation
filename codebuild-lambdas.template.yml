@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda functions.
+Description: CodeBuild projects and ECR repositories for ITS DataHub.
 
 ### Required SSM Variables:
 # "{{resolve:ssm:base-image:version}}"
@@ -23,6 +23,42 @@ Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda func
 # "{{resolve:ssm:elasticsearch-url-prod:version}}"
 
 Resources:
+  ############################################
+  ### Meta codebuild project for this template
+
+  CloudFormationCodeBuildProject:
+  Type: AWS::CodeBuild::Project
+  Properties:
+    Artifacts:
+      Type: NO_ARTIFACTS
+    Description: CodeBuild project for deploying changes to the master branch of datahub-cloudformation.
+    Environment:
+      ComputeType: BUILD_GENERAL1_SMALL
+      Image: aws/codebuild/standard:4.0
+      Type: LINUX_CONTAINER
+      PrivilegedMode: True
+    Name: datahub-cloudformation
+    ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+    Source:
+      Type: NO_SOURCE
+      BuildSpec: |
+        version: 0.2
+        phases:
+          install:
+            runtime-versions:
+              docker: 18
+          build:
+            commands:
+              - bash update-stack.sh
+    Triggers:
+      FilterGroups:
+        - - Type: EVENT
+            Pattern: PUSH
+          - Type: HEAD_REF
+            Pattern: "^refs/heads/master$"
+            ExcludeMatchedPattern: False
+      Webhook: True
+
   ######################
   ### Canary Resources
 
