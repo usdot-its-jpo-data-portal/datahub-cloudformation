@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda functions.
+Description: CodeBuild projects and ECR repositories for ITS DataHub.
 
 ### Required SSM Variables:
 # "{{resolve:ssm:base-image:version}}"
@@ -23,6 +23,45 @@ Description: CodeBuild projects and ECR repositories for ITS DataHub Lambda func
 # "{{resolve:ssm:elasticsearch-url-prod:version}}"
 
 Resources:
+  ############################################
+  ### Meta codebuild project for this template
+
+  CloudFormationCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying changes to the master branch of datahub-cloudformation.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:4.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+      Name: datahub-cloudformation
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/datahub-cloudformation.git
+        Type: GITHUB
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                docker: 18
+            build:
+              commands:
+                - bash update-stack.sh
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/master$"
+              ExcludeMatchedPattern: False
+        Webhook: True
+
   ######################
   ### Canary Resources
 
@@ -672,7 +711,7 @@ Resources:
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: CodeBuild project for deploying the Validation Results Lambda to dev.
+      Description: CodeBuild project for deploying the Datahub Ingest Lambda to dev.
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
@@ -688,7 +727,7 @@ Resources:
             Value: "{{resolve:ssm:elasticsearch-url-dev:1}}"
           - Name: ENV
             Type: PLAINTEXT
-            Value: generic
+            Value: dev
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
@@ -732,7 +771,7 @@ Resources:
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: CodeBuild project for deploying the Validation Results Lambda to stage.
+      Description: CodeBuild project for deploying the Datahub Ingest Lambda to stage.
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
@@ -748,7 +787,7 @@ Resources:
             Value: "{{resolve:ssm:elasticsearch-url-stage:1}}"
           - Name: ENV
             Type: PLAINTEXT
-            Value: generic
+            Value: stage
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
@@ -792,7 +831,7 @@ Resources:
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: CodeBuild project for deploying the Validation Results Lambda to prod.
+      Description: CodeBuild project for deploying the Datahub Ingest Lambda to prod.
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:3.0
@@ -808,7 +847,7 @@ Resources:
             Value: "{{resolve:ssm:elasticsearch-url-prod:1}}"
           - Name: ENV
             Type: PLAINTEXT
-            Value: generic
+            Value: prod
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
