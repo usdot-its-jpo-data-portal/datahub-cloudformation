@@ -473,7 +473,7 @@ Resources:
             Value: "TRUE"
           - Name: RECIPIENTS_DICT
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:validation-results-recipients-dict-dev:2}}"
+            Value: "{{resolve:ssm:validation-results-recipients-dict-dev:3}}"
           - Name: SENDER
             Type: PLAINTEXT
             Value: "{{resolve:ssm:validation-results-sender:1}}"
