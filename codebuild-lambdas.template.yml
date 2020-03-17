@@ -688,7 +688,7 @@ Resources:
             Value: "{{resolve:ssm:elasticsearch-url-dev:1}}"
           - Name: ENV
             Type: PLAINTEXT
-            Value: generic
+            Value: dev
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
@@ -748,7 +748,7 @@ Resources:
             Value: "{{resolve:ssm:elasticsearch-url-stage:1}}"
           - Name: ENV
             Type: PLAINTEXT
-            Value: generic
+            Value: stage
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
@@ -808,7 +808,7 @@ Resources:
             Value: "{{resolve:ssm:elasticsearch-url-prod:1}}"
           - Name: ENV
             Type: PLAINTEXT
-            Value: generic
+            Value: prod
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
             Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
