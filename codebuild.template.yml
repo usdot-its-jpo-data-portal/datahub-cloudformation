@@ -21,6 +21,11 @@ Description: CodeBuild projects and ECR repositories for ITS DataHub.
 # "{{resolve:ssm:elasticsearch-url-dev:version}}"
 # "{{resolve:ssm:elasticsearch-url-stage:version}}"
 # "{{resolve:ssm:elasticsearch-url-prod:version}}"
+# "{{resolve:ssm:validation-results-recipients-dict-dev:version}}"
+# "{{resolve:ssm:validation-results-recipients-dict-stage:version}}"
+# "{{resolve:ssm:validation-results-recipients-dict-prod:version}}"
+# "{{resolve:ssm:validation-results-sender:version}}"
+# "{{resolve:ssm:validation-results-cc:version}}"
 
 Resources:
   ############################################
@@ -397,12 +402,21 @@ Resources:
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
+          - Name: RECIPIENTS_DICT
+            Type: PLAINTEXT
+            Value: "{}"
+          - Name: SENDER
+            Type: PLAINTEXT
+            Value: ""
+          - Name: CC
+            Type: PLAINTEXT
+            Value: ""
           - Name: ENV
             Type: PLAINTEXT
             Value: generic
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT} RECIPIENTSDICT=${RECIPIENTS_DICT} SENDER=${SENDER} CC=${CC}"
           # Buildtime variables
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
@@ -457,12 +471,21 @@ Resources:
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
+          - Name: RECIPIENTS_DICT
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-recipients-dict-dev:1}}"
+          - Name: SENDER
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-sender:1}}"
+          - Name: CC
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-cc:1}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: dev
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT} RECIPIENTSDICT=${RECIPIENTS_DICT} SENDER=${SENDER} CC=${CC}"
           # Buildtime variables
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
@@ -517,12 +540,21 @@ Resources:
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
+          - Name: RECIPIENTS_DICT
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-recipients-dict-stage:1}}"
+          - Name: SENDER
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-sender:1}}"
+          - Name: CC
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-cc:1}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: stage
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT} RECIPIENTSDICT=${RECIPIENTS_DICT} SENDER=${SENDER} CC=${CC}"
           # Buildtime variables
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
@@ -577,12 +609,21 @@ Resources:
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
+          - Name: RECIPIENTS_DICT
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-recipients-dict-prod:1}}"
+          - Name: SENDER
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-sender:1}}"
+          - Name: CC
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:validation-results-cc:1}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: prod
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOK=${SLACK_WEBHOOK} SQSRESULTQUEUE=${SQS_RESULT_QUEUE} VERBOSEOUTPUT=${VERBOSE_OUTPUT} RECIPIENTSDICT=${RECIPIENTS_DICT} SENDER=${SENDER} CC=${CC}"
           # Buildtime variables
           - Name: FUNCTION_NAME
             Type: PLAINTEXT
