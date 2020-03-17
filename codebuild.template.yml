@@ -542,7 +542,7 @@ Resources:
             Value: "TRUE"
           - Name: RECIPIENTS_DICT
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:validation-results-recipients-dict-stage:1}}"
+            Value: "{{resolve:ssm:validation-results-recipients-dict-stage:2}}"
           - Name: SENDER
             Type: PLAINTEXT
             Value: "{{resolve:ssm:validation-results-sender:1}}"
@@ -611,7 +611,7 @@ Resources:
             Value: "TRUE"
           - Name: RECIPIENTS_DICT
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:validation-results-recipients-dict-prod:1}}"
+            Value: "{{resolve:ssm:validation-results-recipients-dict-prod:2}}"
           - Name: SENDER
             Type: PLAINTEXT
             Value: "{{resolve:ssm:validation-results-sender:1}}"
