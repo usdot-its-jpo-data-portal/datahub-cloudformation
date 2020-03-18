@@ -359,7 +359,7 @@ Resources:
                     -e "REGION=$AWS_DEFAULT_REGION" \
                     -e "ENV=$ENV" \
                     -e "PARAMETER_OVERRIDES=${PARAMETER_OVERRIDES}" \
-                    -i $IMAGE_URI:$IMAGE_TAG
+                    -i $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
                 - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
 
   ################################
@@ -666,7 +666,7 @@ Resources:
                     -e "REGION=$AWS_DEFAULT_REGION" \
                     -e "ENV=$ENV" \
                     -e "PARAMETER_OVERRIDES=${PARAMETER_OVERRIDES}" \
-                    -i $IMAGE_URI:$IMAGE_TAG
+                    -i $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
                 - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
 
   ############################
@@ -937,5 +937,5 @@ Resources:
                     -e "REGION=$AWS_DEFAULT_REGION" \
                     -e "ENV=$ENV" \
                     -e "PARAMETER_OVERRIDES=${PARAMETER_OVERRIDES}" \
-                    -i $IMAGE_URI:$IMAGE_TAG
+                    -i $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
                 - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DESTINATION_REPO:latest
