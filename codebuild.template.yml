@@ -464,7 +464,7 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:slack-webhook-dev:1}}"
+            Value: "{{resolve:ssm:slack-webhook-dev:2}}"
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
             Value: "{{resolve:ssm:canary-results-sqs-dev:2}}"
@@ -533,7 +533,7 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:slack-webhook-stage:1}}"
+            Value: "{{resolve:ssm:slack-webhook-stage:2}}"
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
             Value: "{{resolve:ssm:canary-results-sqs-stage:3}}"
@@ -602,7 +602,7 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:slack-webhook-prod:1}}"
+            Value: "{{resolve:ssm:slack-webhook-prod:2}}"
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
             Value: "{{resolve:ssm:canary-results-sqs-prod:3}}"
