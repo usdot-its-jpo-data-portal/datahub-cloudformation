@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: SQS queues for ITS DataHub.
+
+Parameters: 
+  MessageRetentionPeriod: 
+    Type: Number
+    Default: 345600 ## 4 days
+    Description: Time in seconds SQS will keep the message in the queue.
+  VisibilityTimeout: 
+    Type: Number
+    Default: 600 ## 10 minutes
+    Description: Time in seconds SQS will lock a message after being accessed (prevents duplicate message deliveries).
+
+Resources:
+  # Canary Output (Result) Queues
+  ResultQueueDev:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: False
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      QueueName: ResultQueueDev
+      VisibilityTimeout: !Ref VisibilityTimeout
+  ResultQueueStage:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: False
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      QueueName: ResultQueueStage
+      VisibilityTimeout: !Ref VisibilityTimeout
+  ResultQueueProd:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: False
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      QueueName: ResultQueueProd
+      VisibilityTimeout: !Ref VisibilityTimeout
+
+  # Canary Input (Validation) Queues
+  ValidationQueueDev:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: True
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      QueueName: ValidationQueueDev.fifo
+      VisibilityTimeout: !Ref VisibilityTimeout
+  ValidationQueueStage:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: True
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      QueueName: ValidationQueueStage.fifo
+      VisibilityTimeout: !Ref VisibilityTimeout
+  ValidationQueueProd:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: True
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      QueueName: ValidationQueueProd.fifo
+      VisibilityTimeout: !Ref VisibilityTimeout
+
+Outputs: 
+  ResultQueueDevURL: 
+    Value: !Ref ResultQueueDev
+  ResultQueueDevARN:
+    Value: !GetAtt ResultQueueDev.Arn
+  ResultQueueDevName:
+    Value: !GetAtt ResultQueueDev.QueueName
+  ResultQueueStageURL: 
+    Value: !Ref ResultQueueStage
+  ResultQueueStageARN:
+    Value: !GetAtt ResultQueueStage.Arn
+  ResultQueueStageName:
+    Value: !GetAtt ResultQueueStage.QueueName
+  ResultQueueProdURL: 
+    Value: !Ref ResultQueueProd
+  ResultQueueProdARN:
+    Value: !GetAtt ResultQueueProd.Arn
+  ResultQueueProdName:
+    Value: !GetAtt ResultQueueProd.QueueName
+
+  ValidationQueueDevURL: 
+    Value: !Ref ValidationQueueDev
+  ValidationQueueDevARN:
+    Value: !GetAtt ValidationQueueDev.Arn
+  ValidationQueueDevName:
+    Value: !GetAtt ValidationQueueDev.QueueName
+  ValidationQueueStageURL: 
+    Value: !Ref ValidationQueueStage
+  ValidationQueueStageARN:
+    Value: !GetAtt ValidationQueueStage.Arn
+  ValidationQueueStageName:
+    Value: !GetAtt ValidationQueueStage.QueueName
+  ValidationQueueProdURL: 
+    Value: !Ref ValidationQueueProd
+  ValidationQueueProdARN:
+    Value: !GetAtt ValidationQueueProd.Arn
+  ValidationQueueProdName:
+    Value: !GetAtt ValidationQueueProd.QueueName
