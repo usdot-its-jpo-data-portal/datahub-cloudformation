@@ -16,46 +16,46 @@ Resources:
   ResultQueueDev:
     Type: AWS::SQS::Queue
     Properties: 
-      FifoQueue: False
+      FifoQueue: True
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
-      QueueName: ResultQueueDev
+      QueueName: ResultQueueDev.fifo
       VisibilityTimeout: !Ref VisibilityTimeout
   ResultQueueStage:
     Type: AWS::SQS::Queue
     Properties: 
-      FifoQueue: False
+      FifoQueue: True
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
-      QueueName: ResultQueueStage
+      QueueName: ResultQueueStage.fifo
       VisibilityTimeout: !Ref VisibilityTimeout
   ResultQueueProd:
     Type: AWS::SQS::Queue
     Properties: 
-      FifoQueue: False
+      FifoQueue: True
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
-      QueueName: ResultQueueProd
+      QueueName: ResultQueueProd.fifo
       VisibilityTimeout: !Ref VisibilityTimeout
 
   # Canary Input (Validation) Queues
   ValidationQueueDev:
     Type: AWS::SQS::Queue
     Properties: 
-      FifoQueue: True
+      FifoQueue: False
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
-      QueueName: ValidationQueueDev.fifo
+      QueueName: ValidationQueueDev
       VisibilityTimeout: !Ref VisibilityTimeout
   ValidationQueueStage:
     Type: AWS::SQS::Queue
     Properties: 
-      FifoQueue: True
+      FifoQueue: False
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
-      QueueName: ValidationQueueStage.fifo
+      QueueName: ValidationQueueStage
       VisibilityTimeout: !Ref VisibilityTimeout
   ValidationQueueProd:
     Type: AWS::SQS::Queue
     Properties: 
-      FifoQueue: True
+      FifoQueue: False
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
-      QueueName: ValidationQueueProd.fifo
+      QueueName: ValidationQueueProd
       VisibilityTimeout: !Ref VisibilityTimeout
 
 Outputs: 
