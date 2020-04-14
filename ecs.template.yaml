@@ -415,7 +415,7 @@ Resources:
           Environment:
             - Name: server.port
               Value: !Ref AdminAPIPort
-            - Name: datahub.admin.api.token.key
+            - Name: datahub.admin.api.security.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
             - Name: datahub.admin.api.es.host
               Value: "{{resolve:ssm:es-domain-dev:1}}"
@@ -528,7 +528,7 @@ Resources:
           Environment:
             - Name: server.port
               Value: !Ref AdminAPIPort
-            - Name: datahub.admin.api.token.key
+            - Name: datahub.admin.api.security.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
             - Name: datahub.admin.api.es.host
               Value: "{{resolve:ssm:es-domain-stage:1}}"
@@ -641,7 +641,7 @@ Resources:
           Environment:
             - Name: server.port
               Value: !Ref AdminAPIPort
-            - Name: datahub.admin.api.token.key
+            - Name: datahub.admin.api.security.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
             - Name: datahub.admin.api.es.host
               Value: "{{resolve:ssm:es-domain-prod:1}}"
