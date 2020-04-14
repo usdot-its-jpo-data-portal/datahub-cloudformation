@@ -88,6 +88,7 @@ Resources:
       Scheme: internal
       SecurityGroups:
         - "{{resolve:ssm:vpc-sg-id:1}}"
+        - "{{resolve:ssm:external-sg-id:1}}"
       Subnets:
         - "{{resolve:ssm:subnet-a-dev-id:1}}"
         - "{{resolve:ssm:subnet-b-dev-id:1}}"
@@ -185,6 +186,7 @@ Resources:
       Scheme: internal
       SecurityGroups:
         - "{{resolve:ssm:vpc-sg-id:1}}"
+        - "{{resolve:ssm:external-sg-id:1}}"
       Subnets:
         - "{{resolve:ssm:subnet-a-stage-id:1}}"
         - "{{resolve:ssm:subnet-b-stage-id:1}}"
@@ -282,6 +284,7 @@ Resources:
       Scheme: internal
       SecurityGroups:
         - "{{resolve:ssm:vpc-sg-id:1}}"
+        - "{{resolve:ssm:external-sg-id:1}}"
       Subnets:
         - "{{resolve:ssm:subnet-a-prod-id:1}}"
         - "{{resolve:ssm:subnet-b-prod-id:1}}"
