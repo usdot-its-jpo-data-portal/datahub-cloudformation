@@ -413,6 +413,8 @@ Resources:
               Retries: 3
               Timeout: 5
           Environment:
+            - Name: server.port
+              Value: !Ref AdminAPIPort
             - Name: datahub.admin.api.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
             - Name: datahub.admin.api.es.host
@@ -524,6 +526,8 @@ Resources:
               Retries: 3
               Timeout: 5
           Environment:
+            - Name: server.port
+              Value: !Ref AdminAPIPort
             - Name: datahub.admin.api.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
             - Name: datahub.admin.api.es.host
@@ -635,6 +639,8 @@ Resources:
               Retries: 3
               Timeout: 5
           Environment:
+            - Name: server.port
+              Value: !Ref AdminAPIPort
             - Name: datahub.admin.api.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
             - Name: datahub.admin.api.es.host
