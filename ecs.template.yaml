@@ -61,7 +61,10 @@ Resources:
   AdminUITargetGroupDev:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
+      HealthCheckEnabled: True
+      HealthCheckIntervalSeconds: 30
       HealthCheckPath: "/"
+      HealthyThresholdCount: 2
       Name: admin-ui-dev-tg
       Port: !Ref AdminUIPort
       Protocol: HTTP
@@ -155,7 +158,10 @@ Resources:
   AdminUITargetGroupStage:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
+      HealthCheckEnabled: True
+      HealthCheckIntervalSeconds: 30
       HealthCheckPath: "/"
+      HealthyThresholdCount: 2
       Name: admin-ui-stage-tg
       Port: !Ref AdminUIPort
       Protocol: HTTP
@@ -249,7 +255,10 @@ Resources:
   AdminUITargetGroupProd:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
+      HealthCheckEnabled: True
+      HealthCheckIntervalSeconds: 30
       HealthCheckPath: "/"
+      HealthyThresholdCount: 2
       Name: admin-ui-prod-tg
       Port: !Ref AdminUIPort
       Protocol: HTTP
@@ -346,7 +355,11 @@ Resources:
   AdminAPITargetGroupDev:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckPath: "/"
+      HealthCheckEnabled: True
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/api/health"
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 5
       Name: admin-api-dev-tg
       Port: !Ref AdminAPIPort
       Protocol: HTTP
@@ -392,6 +405,13 @@ Resources:
           Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/admin-api-dev:latest"
           PortMappings:
             - ContainerPort: !Ref AdminAPIPort
+          HealthCheck:
+              Command: 
+                - CMD-SHELL
+                - curl -f http://localhost:3000/api/health || exit 1
+              Interval: 30
+              Retries: 3
+              Timeout: 5
           Environment:
             - Name: datahub.admin.api.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
@@ -446,7 +466,11 @@ Resources:
   AdminAPITargetGroupStage:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckPath: "/"
+      HealthCheckEnabled: True
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/api/health"
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 5
       Name: admin-api-stage-tg
       Port: !Ref AdminAPIPort
       Protocol: HTTP
@@ -492,6 +516,13 @@ Resources:
           Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/admin-api-stage:latest"
           PortMappings:
             - ContainerPort: !Ref AdminAPIPort
+          HealthCheck:
+              Command: 
+                - CMD-SHELL
+                - curl -f http://localhost:3000/api/health || exit 1
+              Interval: 30
+              Retries: 3
+              Timeout: 5
           Environment:
             - Name: datahub.admin.api.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
@@ -546,7 +577,11 @@ Resources:
   AdminAPITargetGroupProd:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckPath: "/"
+      HealthCheckEnabled: True
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/api/health"
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 5
       Name: admin-api-prod-tg
       Port: !Ref AdminAPIPort
       Protocol: HTTP
@@ -592,6 +627,13 @@ Resources:
           Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/admin-api-prod:latest"
           PortMappings:
             - ContainerPort: !Ref AdminAPIPort
+          HealthCheck:
+              Command: 
+                - CMD-SHELL
+                - curl -f http://localhost:3000/api/health || exit 1
+              Interval: 30
+              Retries: 3
+              Timeout: 5
           Environment:
             - Name: datahub.admin.api.token.key
               Value: "{{resolve:ssm:admin-api-token:1}}"
