@@ -88,7 +88,7 @@ Resources:
             Value: !Ref ClusterNameDev # TODO replace this with import
             Type: PLAINTEXT
           - Name: ECS_SERVICE
-            Value: "admin-ui-dev" # TODO replace this with import
+            Value: "admin-ui-service-dev" # TODO replace this with import
             Type: PLAINTEXT
       Name: admin-ui-dev
       ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
@@ -128,7 +128,7 @@ Resources:
             Value: !Ref ClusterNameStage # TODO replace this with import
             Type: PLAINTEXT
           - Name: ECS_SERVICE
-            Value: "admin-ui-stage" # TODO replace this with import
+            Value: "admin-ui-service-stage" # TODO replace this with import
             Type: PLAINTEXT
       Name: admin-ui-stage
       ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
@@ -171,7 +171,7 @@ Resources:
             Value: !Ref ClusterNameProd
             Type: PLAINTEXT
           - Name: SERVICE_NAME
-            Value: "admin-ui-prod-service" # TODO replace with import
+            Value: "admin-ui-service-prod" # TODO replace with import
             Type: PLAINTEXT
       Name: admin-ui-prod-promotion
       ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
