@@ -38,22 +38,19 @@ Resources:
   # Canary Input (Validation) Queues
   ValidationQueueDev:
     Type: AWS::SQS::Queue
-    Properties: 
-      FifoQueue: False
+    Properties:
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
       QueueName: ValidationQueueDev
       VisibilityTimeout: !Ref VisibilityTimeout
   ValidationQueueStage:
     Type: AWS::SQS::Queue
-    Properties: 
-      FifoQueue: False
+    Properties:
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
       QueueName: ValidationQueueStage
       VisibilityTimeout: !Ref VisibilityTimeout
   ValidationQueueProd:
     Type: AWS::SQS::Queue
-    Properties: 
-      FifoQueue: False
+    Properties:
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
       QueueName: ValidationQueueProd
       VisibilityTimeout: !Ref VisibilityTimeout
