@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CodeBuild projects and ECR repositories for ITS DataHub.
+Description: CodeBuild projects and ECR repositories for ITS DataHub lambda functions.
 
 ### Required SSM Variables:
 # "{{resolve:ssm:base-image:version}}"
@@ -26,6 +26,10 @@ Description: CodeBuild projects and ECR repositories for ITS DataHub.
 # "{{resolve:ssm:validation-results-recipients-dict-prod:version}}"
 # "{{resolve:ssm:validation-results-sender:version}}"
 # "{{resolve:ssm:validation-results-cc:version}}"
+# "{{resolve:ssm:vpc-internal-sg-id:version}}"
+# "{{resolve:ssm:subnets-dev:version}}"
+# "{{resolve:ssm:subnets-stage:version}}"
+# "{{resolve:ssm:subnets-prod:version}}"
 
 Resources:
   ############################################
@@ -713,9 +717,15 @@ Resources:
           - Name: ENV
             Type: PLAINTEXT
             Value: generic
+          - Name: SUBNETS
+            Type: PLAINTEXT
+            Value: ""
+          - Name: SECURITY_GROUPS
+            Type: PLAINTEXT
+            Value: ""
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL} SUBNETS=${SUBNETS} SECURITYGROUPS=${SECURITY_GROUPS}"
           # Buildtime variables
           - Name: SONAR_TOKEN
             Type: PLAINTEXT
@@ -773,9 +783,15 @@ Resources:
           - Name: ENV
             Type: PLAINTEXT
             Value: dev
+          - Name: SUBNETS
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:subnets-dev:1}}"
+          - Name: SECURITY_GROUPS
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:vpc-internal-sg-id:1}}"
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL} SUBNETS=${SUBNETS} SECURITYGROUPS=${SECURITY_GROUPS}"
           # Buildtime variables
           - Name: SONAR_TOKEN
             Type: PLAINTEXT
@@ -826,16 +842,22 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK_URL
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:slack-ingest-stage:1}}"
+            Value: "{{resolve:ssm:slack-ingest-stage:2}}"
           - Name: ELASTICSEARCH_API_BASE_URL
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:elasticsearch-url-stage:1}}"
+            Value: "{{resolve:ssm:elasticsearch-url-stage:2}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: stage
+          - Name: SUBNETS
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:subnets-stage:1}}"
+          - Name: SECURITY_GROUPS
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:vpc-internal-sg-id:1}}"
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL} SUBNETS=${SUBNETS} SECURITYGROUPS=${SECURITY_GROUPS}"
           # Buildtime variables
           - Name: SONAR_TOKEN
             Type: PLAINTEXT
@@ -886,16 +908,22 @@ Resources:
           # Runtime variables
           - Name: SLACK_WEBHOOK_URL
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:slack-ingest-prod:1}}"
+            Value: "{{resolve:ssm:slack-ingest-prod:2}}"
           - Name: ELASTICSEARCH_API_BASE_URL
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:elasticsearch-url-prod:1}}"
+            Value: "{{resolve:ssm:elasticsearch-url-prod:2}}"
           - Name: ENV
             Type: PLAINTEXT
             Value: prod
+          - Name: SUBNETS
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:subnets-prod:1}}"
+          - Name: SECURITY_GROUPS
+            Type: PLAINTEXT
+            Value: "{{resolve:ssm:vpc-internal-sg-id:1}}"
           - Name: PARAMETER_OVERRIDES
             Type: PLAINTEXT
-            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL}"
+            Value: "--parameter-overrides ENV=${ENV} SLACKWEBHOOKURL=${SLACK_WEBHOOK_URL} ENVIRONMENTNAME=${ENV} ELASTICSEARCHAPIBASEURL=${ELASTICSEARCH_API_BASE_URL} SUBNETS=${SUBNETS} SECURITYGROUPS=${SECURITY_GROUPS}"
           # Buildtime variables
           - Name: SONAR_TOKEN
             Type: PLAINTEXT
