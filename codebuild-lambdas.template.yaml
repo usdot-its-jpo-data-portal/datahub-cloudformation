@@ -467,7 +467,7 @@ Resources:
             Value: "{{resolve:ssm:slack-webhook-dev:2}}"
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:canary-results-sqs-dev:2}}"
+            Value: !ImportValue ResultQueueDevName
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
@@ -536,7 +536,7 @@ Resources:
             Value: "{{resolve:ssm:slack-webhook-stage:2}}"
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:canary-results-sqs-stage:3}}"
+            Value: !ImportValue ResultQueueStageName
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
@@ -605,7 +605,7 @@ Resources:
             Value: "{{resolve:ssm:slack-webhook-prod:3}}"
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:canary-results-sqs-prod:3}}"
+            Value: !ImportValue ResultQueueProdName
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
