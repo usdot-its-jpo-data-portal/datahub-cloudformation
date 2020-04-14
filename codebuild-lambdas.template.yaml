@@ -170,7 +170,7 @@ Resources:
             Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
           - Name: SQS_VALIDATION_QUEUE_ARN
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:canary-source-sqs-arn-dev:2}}"
+            Value: !ImportValue ValidationQueueDevARN
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
             Value: !ImportValue ResultQueueDevName
@@ -236,7 +236,7 @@ Resources:
             Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
           - Name: SQS_VALIDATION_QUEUE_ARN
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:canary-source-sqs-arn-stage:1}}"
+            Value: !ImportValue ValidationQueueStageARN
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
             Value: !ImportValue ResultQueueStageName
@@ -302,7 +302,7 @@ Resources:
             Value: "{{resolve:ssm:sqs-storage-bucket:1}}"
           - Name: SQS_VALIDATION_QUEUE_ARN
             Type: PLAINTEXT
-            Value: "{{resolve:ssm:canary-source-sqs-arn-prod:1}}"
+            Value: !ImportValue ValidationQueueProdARN
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
             Value: !ImportValue ResultQueueProdName
