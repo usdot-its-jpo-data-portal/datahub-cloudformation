@@ -114,7 +114,7 @@ Resources:
             - Name: PROXY_PASS
               Value: !Sub
                 - "resolver 10.209.97.136 valid=10s; set $backend \"http://${LB_DOMAIN}:3000\"; proxy_pass $backend;"
-                - { LB_DOMAIN: !GetAtt AdminUILoadBalancerDev.DNSName }
+                - { LB_DOMAIN: !GetAtt AdminAPILoadBalancerDev.DNSName }
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -211,7 +211,7 @@ Resources:
             - Name: PROXY_PASS
               Value: !Sub
                 - "resolver 10.209.97.136 valid=10s; set $backend \"http://${LB_DOMAIN}:3000\"; proxy_pass $backend;"
-                - { LB_DOMAIN: !GetAtt AdminUILoadBalancerStage.DNSName }
+                - { LB_DOMAIN: !GetAtt AdminAPILoadBalancerStage.DNSName }
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -308,7 +308,7 @@ Resources:
             - Name: PROXY_PASS
               Value: !Sub
                 - "resolver 10.209.97.136 valid=10s; set $backend \"http://${LB_DOMAIN}:3000\"; proxy_pass $backend;"
-                - { LB_DOMAIN: !GetAtt AdminUILoadBalancerProd.DNSName }
+                - { LB_DOMAIN: !GetAtt AdminAPILoadBalancerProd.DNSName }
           LogConfiguration:
             LogDriver: awslogs
             Options:
