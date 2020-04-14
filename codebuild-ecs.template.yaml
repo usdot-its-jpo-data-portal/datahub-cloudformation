@@ -167,7 +167,7 @@ Resources:
           - Name: AWS_ACCOUNT_ID
             Value: !Ref AWS::AccountId
             Type: PLAINTEXT
-          - Name: $CLUSTER_NAME
+          - Name: CLUSTER_NAME
             Value: !Ref ClusterNameProd
             Type: PLAINTEXT
           - Name: SERVICE_NAME
@@ -344,7 +344,7 @@ Resources:
           - Name: AWS_ACCOUNT_ID
             Value: !Ref AWS::AccountId
             Type: PLAINTEXT
-          - Name: $CLUSTER_NAME
+          - Name: CLUSTER_NAME
             Value: !Ref ClusterNameProd
             Type: PLAINTEXT
           - Name: SERVICE_NAME
