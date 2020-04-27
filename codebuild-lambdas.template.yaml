@@ -302,7 +302,7 @@ Resources:
             Value: !ImportValue ValidationQueueProdARN
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
-            Value: !ImportValue ResultQueueProdName
+            Value: !ImportValue ResultQueueProdARN
           - Name: SQS_PUBLISHER_MODE
             Type: PLAINTEXT
             Value: "TRUE"
@@ -605,7 +605,7 @@ Resources:
             Value: "{{resolve:ssm:slack-webhook-prod:3}}"
           - Name: SQS_RESULT_QUEUE
             Type: PLAINTEXT
-            Value: !ImportValue ResultQueueProdName
+            Value: !ImportValue ResultQueueProdARN
           - Name: VERBOSE_OUTPUT
             Type: PLAINTEXT
             Value: "TRUE"
