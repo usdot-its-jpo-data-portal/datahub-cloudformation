@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: SQS queues for ITS DataHub.
 
-Parameters: 
-  MessageRetentionPeriod: 
+Parameters:
+  MessageRetentionPeriod:
     Type: Number
     Default: 345600 ## 4 days
     Description: Time in seconds SQS will keep the message in the queue.
-  VisibilityTimeout: 
+  VisibilityTimeout:
     Type: Number
     Default: 600 ## 10 minutes
     Description: Time in seconds SQS will lock a message after being accessed (prevents duplicate message deliveries).
@@ -15,21 +15,21 @@ Resources:
   # Canary Output (Result) Queues
   ResultQueueDev:
     Type: AWS::SQS::Queue
-    Properties: 
+    Properties:
       FifoQueue: True
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
       QueueName: ResultQueueDev.fifo
       VisibilityTimeout: !Ref VisibilityTimeout
   ResultQueueStage:
     Type: AWS::SQS::Queue
-    Properties: 
+    Properties:
       FifoQueue: True
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
       QueueName: ResultQueueStage.fifo
       VisibilityTimeout: !Ref VisibilityTimeout
   ResultQueueProd:
     Type: AWS::SQS::Queue
-    Properties: 
+    Properties:
       FifoQueue: True
       MessageRetentionPeriod: !Ref MessageRetentionPeriod
       QueueName: ResultQueueProd.fifo
@@ -55,41 +55,76 @@ Resources:
       QueueName: ValidationQueueProd
       VisibilityTimeout: !Ref VisibilityTimeout
 
-Outputs: 
-  ResultQueueDevURL: 
+Outputs:
+  ResultQueueDevURL:
     Value: !Ref ResultQueueDev
+    Export:
+        Name: ResultQueueDevURL
   ResultQueueDevARN:
     Value: !GetAtt ResultQueueDev.Arn
+    Export:
+        Name: ResultQueueDevARN
   ResultQueueDevName:
     Value: !GetAtt ResultQueueDev.QueueName
-  ResultQueueStageURL: 
+    Export:
+        Name: ResultQueueDevName
+  ResultQueueStageURL:
     Value: !Ref ResultQueueStage
+    Export:
+        Name: ResultQueueStageURL
   ResultQueueStageARN:
     Value: !GetAtt ResultQueueStage.Arn
+    Export:
+        Name: ResultQueueStageARN
   ResultQueueStageName:
     Value: !GetAtt ResultQueueStage.QueueName
-  ResultQueueProdURL: 
+    Export:
+        Name: ResultQueueStageName
+  ResultQueueProdURL:
     Value: !Ref ResultQueueProd
+    Export:
+        Name: ResultQueueProdURL
   ResultQueueProdARN:
     Value: !GetAtt ResultQueueProd.Arn
+    Export:
+        Name: ResultQueueProdARN
   ResultQueueProdName:
     Value: !GetAtt ResultQueueProd.QueueName
-
-  ValidationQueueDevURL: 
+    Export:
+        Name: ResultQueueProdName
+  ValidationQueueDevURL:
     Value: !Ref ValidationQueueDev
+    Export:
+        Name: ValidationQueueDevURL
   ValidationQueueDevARN:
     Value: !GetAtt ValidationQueueDev.Arn
+    Export:
+        Name: ValidationQueueDevARN
   ValidationQueueDevName:
     Value: !GetAtt ValidationQueueDev.QueueName
-  ValidationQueueStageURL: 
+    Export:
+        Name: ValidationQueueDevName
+  ValidationQueueStageURL:
     Value: !Ref ValidationQueueStage
+    Export:
+        Name: ValidationQueueStageURL
   ValidationQueueStageARN:
     Value: !GetAtt ValidationQueueStage.Arn
+    Export:
+        Name: ValidationQueueStageARN
   ValidationQueueStageName:
     Value: !GetAtt ValidationQueueStage.QueueName
-  ValidationQueueProdURL: 
+    Export:
+        Name: ValidationQueueStageName
+  ValidationQueueProdURL:
     Value: !Ref ValidationQueueProd
+    Export:
+        Name: ValidationQueueProdURL
   ValidationQueueProdARN:
     Value: !GetAtt ValidationQueueProd.Arn
+    Export:
+        Name: ValidationQueueProdARN
   ValidationQueueProdName:
     Value: !GetAtt ValidationQueueProd.QueueName
+    Export:
+        Name: ValidationQueueProdName
