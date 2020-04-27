@@ -55,76 +55,41 @@ Resources:
       QueueName: ValidationQueueProd
       VisibilityTimeout: !Ref VisibilityTimeout
 
-Outputs:
-  ResultQueueDevURL:
-    Value: !Ref ResultQueueDev
-    Export:
-        Name: ResultQueueDevURL
-  ResultQueueDevARN:
-    Value: !GetAtt ResultQueueDev.Arn
-    Export:
+  # SSM parameters
+    ResultQueueDevARN:
+      Type: AWS::SSM::Parameter
+      Properties:
         Name: ResultQueueDevARN
-  ResultQueueDevName:
-    Value: !GetAtt ResultQueueDev.QueueName
-    Export:
-        Name: ResultQueueDevName
-  ResultQueueStageURL:
-    Value: !Ref ResultQueueStage
-    Export:
-        Name: ResultQueueStageURL
-  ResultQueueStageARN:
-    Value: !GetAtt ResultQueueStage.Arn
-    Export:
+        Type: String
+        Value: !GetAtt ResultQueueDev.Arn
+    ResultQueueStageARN:
+      Type: AWS::SSM::Parameter
+      Properties:
         Name: ResultQueueStageARN
-  ResultQueueStageName:
-    Value: !GetAtt ResultQueueStage.QueueName
-    Export:
-        Name: ResultQueueStageName
-  ResultQueueProdURL:
-    Value: !Ref ResultQueueProd
-    Export:
-        Name: ResultQueueProdURL
-  ResultQueueProdARN:
-    Value: !GetAtt ResultQueueProd.Arn
-    Export:
+        Type: String
+        Value: !GetAtt ResultQueueStage.Arn
+    ResultQueueProdARN:
+      Type: AWS::SSM::Parameter
+      Properties:
         Name: ResultQueueProdARN
-  ResultQueueProdName:
-    Value: !GetAtt ResultQueueProd.QueueName
-    Export:
-        Name: ResultQueueProdName
-  ValidationQueueDevURL:
-    Value: !Ref ValidationQueueDev
-    Export:
-        Name: ValidationQueueDevURL
-  ValidationQueueDevARN:
-    Value: !GetAtt ValidationQueueDev.Arn
-    Export:
+        Type: String
+        Value: !GetAtt ResultQueueProd.Arn
+
+    ValidationQueueDevARN:
+      Type: AWS::SSM::Parameter
+      Properties:
         Name: ValidationQueueDevARN
-  ValidationQueueDevName:
-    Value: !GetAtt ValidationQueueDev.QueueName
-    Export:
-        Name: ValidationQueueDevName
-  ValidationQueueStageURL:
-    Value: !Ref ValidationQueueStage
-    Export:
-        Name: ValidationQueueStageURL
-  ValidationQueueStageARN:
-    Value: !GetAtt ValidationQueueStage.Arn
-    Export:
+        Type: String
+        Value: !GetAtt ValidationQueueDev.Arn
+    ValidationQueueStageARN:
+      Type: AWS::SSM::Parameter
+      Properties:
         Name: ValidationQueueStageARN
-  ValidationQueueStageName:
-    Value: !GetAtt ValidationQueueStage.QueueName
-    Export:
-        Name: ValidationQueueStageName
-  ValidationQueueProdURL:
-    Value: !Ref ValidationQueueProd
-    Export:
-        Name: ValidationQueueProdURL
-  ValidationQueueProdARN:
-    Value: !GetAtt ValidationQueueProd.Arn
-    Export:
+        Type: String
+        Value: !GetAtt ValidationQueueStage.Arn
+    ValidationQueueProdARN:
+      Type: AWS::SSM::Parameter
+      Properties:
         Name: ValidationQueueProdARN
-  ValidationQueueProdName:
-    Value: !GetAtt ValidationQueueProd.QueueName
-    Export:
-        Name: ValidationQueueProdName
+        Type: String
+        Value: !GetAtt ValidationQueueProd.Arn
