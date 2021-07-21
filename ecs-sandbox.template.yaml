@@ -1,0 +1,303 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: All resources for ECS task ingesting sample data from CV Pilot data lake to Socrata.
+
+### Required SSM Variables:
+# "{{resolve:ssm:ecs-execution-role-arn:version}}"
+# "{{resolve:ssm:external-sg-id:version}}"
+# "{{resolve:ssm:socrata-auth:version}}"
+# "{{resolve:ssm:subnet-a-dev-id:version}}"
+# "{{resolve:ssm:subnet-a-prod-id:version}}"
+
+Parameters: 
+  DefaultEcsArnRole:
+    Type: String
+    Default: "{{resolve:ssm:ecs-execution-role-arn:1}}"
+  DefaultExternalSecurityGroup:
+    Type: String
+    Default: "{{resolve:ssm:external-sg-id:1}}"
+  DefaultSubnetDev:
+    Type: String
+    Default: "{{resolve:ssm:subnet-a-dev-id:1}}"
+  DefaultSubnetProd:
+    Type: String
+    Default: "{{resolve:ssm:subnet-a-prod-id:1}}"
+  SocrataAuth:
+    Type: String
+    Default: "{{resolve:ssm:socrata-auth:1}}"
+  SandboxClusterNameDev:
+    Type: String
+    Default: "sandbox-cluster-dev"
+  SandboxClusterNameProd:
+    Type: String
+    Default: "sandbox-cluster-prod"
+
+Resources:
+  ######################
+  ### CV Lake To Socrata Resources
+
+  ## ECR Repositories
+  CvLakeToSocrataDev:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: cv-lake-to-socrata-dev
+  CvLakeToSocrataProd:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: cv-lake-to-socrata-prod
+
+  ## CodeBuild Projects
+  CvLakeToSocrataCodeBuildGeneric:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for testing buildability of all commits.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          - Name: AWS_ACCOUNT_ID
+            Type: PLAINTEXT
+            Value: "null"
+          - Name: IMAGE_REPO_NAME
+            Type: PLAINTEXT
+            Value: "null"
+      Name: cv-lake-to-socrata-generic
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/cv-lake-to-socrata.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/(master|development)$"
+              ExcludeMatchedPattern: True
+        Webhook: True
+
+  CvLakeToSocrataCodeBuildDev:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for deploying the CvLakeToSocrata task to dev.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+            Type: PLAINTEXT
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref CvLakeToSocrataDev
+            Type: PLAINTEXT
+          - Name: ECS_CLUSTER
+            Value: !Ref SandboxClusterNameDev # TODO replace this with import
+            Type: PLAINTEXT
+          - Name: ECS_SERVICE
+            Value: "admin-ui-service-dev" # TODO replace this with import
+            Type: PLAINTEXT
+      Name: cv-lake-to-socrata-dev
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: https://github.com/usdot-its-jpo-data-portal/cv-lake-to-socrata.git
+        Type: GITHUB
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: "^refs/heads/development$"
+              ExcludeMatchedPattern: False
+        Webhook: True
+
+  CvLakeToSocrataCodeBuildProd:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: CodeBuild project for promoting the CvLakeToSocrata task from dev to prod.
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: True
+        EnvironmentVariables:
+          - Name: DEV_REPO_NAME
+            Value: !Ref CvLakeToSocrataDev
+            Type: PLAINTEXT
+          - Name: PROD_REPO_NAME
+            Value: !Ref CvLakeToSocrataProd
+            Type: PLAINTEXT
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+            Type: PLAINTEXT
+          - Name: CLUSTER_NAME
+            Value: !Ref SandboxClusterNameProd
+            Type: PLAINTEXT
+      Name: cv-lake-to-socrata-prod-promotion
+      ServiceRole: "{{resolve:ssm:codebuild-role-arn:1}}"
+      Source:
+        Type: NO_SOURCE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                docker: 18
+            build:
+              commands:
+                - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+                - docker pull $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DEV_REPO_NAME:latest
+                - docker tag $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$DEV_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$PROD_REPO_NAME:latest
+                - docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$PROD_REPO_NAME:latest
+
+  ## ECS Task Definition
+  CvLakeToSocrataTaskDefDev:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      Family: cv-lake-to-socrata-dev-taskdef
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE      
+      Cpu: 512
+      Memory: 1024
+      ExecutionRoleArn: !Ref DefaultEcsArnRole
+      TaskRoleArn: !Ref DefaultEcsArnRole
+      ContainerDefinitions: 
+        - Name: cv-lake-to-socrata-dev
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/cv-lake-to-socrata-dev:latest"
+          Environment:
+            - Name: EVENT
+              Value: '{"overwrite": true, "num_hours_backtrack": 24, "s3_source_bucket": "usdot-its-cvpilot-public-data", "s3_source_prefix": "wydot/TIM", "socrata_dataset_id": "xxxx-xxxx", "float_fields": [], "data_sample_length": "day", "permission": "private"}'
+            - Name: AUTH
+              Value: !Ref SocrataAuth
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref CvLakeToSocrataLogGroupDev
+              awslogs-stream-prefix: ecs
+
+  CvLakeToSocrataTaskDefProd:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      Family: cv-lake-to-socrata-prod-taskdef
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE      
+      Cpu: 512
+      Memory: 1024
+      ExecutionRoleArn: !Ref DefaultEcsArnRole
+      TaskRoleArn: !Ref DefaultEcsArnRole
+      ContainerDefinitions: 
+        - Name: cv-lake-to-socrata-prod
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/cv-lake-to-socrata-prod:latest"
+          Environment:
+            - Name: EVENT
+              Value: '{"overwrite": true, "num_hours_backtrack": 24, "s3_source_bucket": "usdot-its-cvpilot-public-data", "s3_source_prefix": "wydot/TIM", "socrata_dataset_id": "xxxx-xxxx", "float_fields": [], "data_sample_length": "day", "permission": "public"}'
+            - Name: AUTH
+              Value: !Ref SocrataAuth
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref CvLakeToSocrataLogGroupProd
+              awslogs-stream-prefix: ecs
+  
+  ## Log Groups
+  CvLakeToSocrataLogGroupDev:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: "/ecs/cv-lake-to-socrata"
+
+  CvLakeToSocrataLogGroupProd:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: "/ecs/cv-lake-to-socrata"
+
+  ## Events
+  CvpNycdotEventProd:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: 'Event triggers ingestion of NYCDOT CVP event data from the previous month from data lake (ITS sandbox) to the corresponding prod Socrata sample dataset. Triggered on the 20th of every month as that is when the previous month's data is likely to be completed.'
+      ScheduleExpression: cron(0 4 20 * ? *)
+      State: ENABLED
+      Targets:
+      - Id: "cvp-nycdot-event-prod"
+        Arn: !Ref DefaultEcsArnRole
+        RoleArn: !Ref DefaultEcsArnRole
+        Input: '{ "containerOverrides": [{"name": "cv-lake-to-socrata-prod", "environment": [{"name": "EVENT", "value": "{\"overwrite\": true, \"num_hours_backtrack\": 720, \"s3_source_bucket\": \"usdot-its-cvpilot-public-data\", \"s3_source_prefix\": \"nycdot/EVENT\", \"socrata_dataset_id\": \"vxmm-9bi5\", \"float_fields\": [], \"data_sample_length\": \"month\", \"permission\": \"public\"}"}]}]}'  
+        EcsParameters:
+          Group: !Ref SandboxClusterNameProd
+          TaskDefinitionArn: !Ref CvLakeToSocrataTaskDefProd
+          TaskCount: 1
+          LaunchType: 'FARGATE'
+          PlatformVersion: 'LATEST'
+          NetworkConfiguration:
+            AwsVpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups:
+                - !Ref DefaultExternalSecurityGroup
+              Subnets:
+                - !Ref DefaultSubnetProd
+        
+
+  CvpWydotBsmProd:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: 'Event triggers ingestion of WYDOT CVP BSM data from three days ago from the data lake (ITS sandbox) to the corresponding prod Socrata sample dataset. Triggered daily.'
+      ScheduleExpression: cron(0 5 * * ? *)
+      State: ENABLED
+      Targets:
+      - Id: "cvp-wydot-bsm-prod"
+        Arn: !Ref DefaultEcsArnRole
+        RoleArn: !Ref DefaultEcsArnRole
+        Input: '{ "containerOverrides": [{"name": "cv-lake-to-socrata-prod", "environment": [{"name":"EVENT","value":"{\"overwrite\": true, \"num_hours_backtrack\": 72, \"s3_source_bucket\": \"usdot-its-cvpilot-public-data\", \"s3_source_prefix\": \"wydot/BSM\", \"socrata_dataset_id\": \"7qu7-j8rx\", \"float_fields\": [], \"data_sample_length\": \"day\", \"permission\": \"public\"}"}]}]}'  
+        EcsParameters:
+          Group: !Ref SandboxClusterNameProd
+          TaskDefinitionArn: !Ref CvLakeToSocrataTaskDefProd
+          TaskCount: 1
+          LaunchType: 'FARGATE'
+          PlatformVersion: 'LATEST'
+          NetworkConfiguration:
+            AwsVpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups:
+                - !Ref DefaultExternalSecurityGroup
+              Subnets:
+                - !Ref DefaultSubnetProd
+          
+  CvpWydotTimProd:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: 'Event triggers ingestion of WYDOT CVP TIM data from three days ago from the data lake (ITS sandbox) to the corresponding prod Socrata sample dataset. Triggered daily.'
+      ScheduleExpression: cron(30 4 * * ? *)
+      State: ENABLED
+      Targets:
+      - Id: "cvp-wydot-tim-prod"
+        Arn: !Ref DefaultEcsArnRole
+        RoleArn: !Ref DefaultEcsArnRole
+        Input: '{ "containerOverrides": [{"name": "cv-lake-to-socrata-prod", "environment": [{"name":"EVENT","value":"{\"overwrite\": true, \"num_hours_backtrack\": 72, \"s3_source_bucket\": \"usdot-its-cvpilot-public-data\", \"s3_source_prefix\": \"wydot/TIM\", \"socrata_dataset_id\": \"6nxx-nmxk\", \"float_fields\": [], \"data_sample_length\": \"day\", \"permission\": \"public\"}"}]}]}'  
+        EcsParameters:
+          Group: !Ref SandboxClusterNameProd
+          TaskDefinitionArn: !Ref CvLakeToSocrataTaskDefProd
+          TaskCount: 1
+          LaunchType: 'FARGATE'
+          PlatformVersion: 'LATEST'
+          NetworkConfiguration:
+            AwsVpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups:
+                - !Ref DefaultExternalSecurityGroup
+              Subnets:
+                - !Ref DefaultSubnetProd
